@@ -1,5 +1,4 @@
 #include "camera.hpp"
-
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -32,9 +31,9 @@ glm::mat4 Camera::getProjectionMatrix() {
 void Camera::processMovement(glm::vec3 direction, float deltaTime) {
     if (glm::length(direction)) {
         direction = glm::normalize(direction) * movementSpeed;
-        position += glm::normalize(glm::cross(up, right)) * direction.x;
-        position += right * direction.y;
-        position += up * direction.z;
+        position += right * direction.x;
+        position += up * direction.y;
+        position += glm::normalize(glm::cross(up, right)) * direction.z;
     }
 }
 
