@@ -1,15 +1,20 @@
 #include "block.hpp"
 #include "camera.hpp"
+#include "chunk.hpp"
+#include "noise.hpp"
+#include "shader.hpp"
+#include "world.hpp"
+
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "shader.hpp"
 #include "stb_image.h"
 
 #include <cmath>
 #include <iostream>
+#include <map>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -19,7 +24,7 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 const int windowWidth = 1200;
 const int windowHeight = 800;
 const float nearPlane = 0.1f;
-const float farPlane = 100.0f;
+const float farPlane = 1000.0f;
 
 bool wireframe = false;
 
@@ -29,8 +34,7 @@ float mouseXOffset = 0.0f;
 float mouseYOffset = 0.0f;
 float scrollOffset = 0.0f;
 
-float aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
-Camera camera = Camera(aspectRatio, nearPlane, farPlane, glm::vec3(0.0f, 10.0f, 0.0f), 0.2f, 0.3f, 1.8f);
+float aspectRatio = (float) windowWidth / (float) windowHeight;
 glm::vec3 moveDir = glm::vec3(0.0f, 0.0f, 0.0f);
 
 int main() {
@@ -64,8 +68,10 @@ int main() {
     glViewport(0, 0, windowWidth, windowHeight);
     glEnable(GL_DEPTH_TEST);  
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glLineWidth(5.0f);
 
     Shader shader("shaders/shader.vs", "shaders/shader.fs");
 
@@ -76,27 +82,21 @@ int main() {
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Block::vertices), Block::vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, pow(Chunk::size, 3) * 2 * 6 * sizeof(Block::rightFace), NULL, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    Camera camera = Camera(aspectRatio, nearPlane, farPlane, glm::vec3(0.0f, 20.0f, 0.0f), 0.2f, 0.3f, 1.8f);
+    World world = World();
 
     float deltaTime = 0.0f;
     float lastFrame = glfwGetTime();
 
-    Block blocks[100][4][100];
-
-    for (unsigned int x = 0; x < 100; x++) {
-        for (unsigned int z = 0; z < 100; z++) {
-            blocks[x][3][z] = Block(GRASS);
-            blocks[x][2][z] = Block(DIRT);
-            blocks[x][1][z] = Block(DIRT);
-            blocks[x][0][z] = Block(STONE);
-        }
-    }
-
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
@@ -106,21 +106,15 @@ int main() {
 
         glBindVertexArray(VAO);
 
-        for (unsigned int x = 0; x < 100; x++) {
-            for (unsigned int y = 0; y < 4; y++) {
-                for(unsigned int z = 0; z < 100; z++) {
-                    if (blocks[x][y][z].type != AIR) {
-                        glm::mat4 model = glm::mat4(1.0f);
-                        model = glm::translate(model, glm::vec3(x - 50.0f, y, z - 50.0f));
-                        shader.setMat4("model", model);
+        for (int x = 0; x < 2; x++) {
+            for (int z = 0; z < 2; z++) {
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x, 0.0f, z) * (float) Chunk::size);
+                shader.setMat4("model", model);
 
-                        shader.setVec4("color", blocks[x][y][z].color());
-                        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-                        shader.setVec4("color", glm::vec4(0.3f, 0.3f, 0.3f, 1.0f));
-                        glDrawArrays(GL_LINES, 0, 36);
-                    }
-                }
+                Chunk chunk = world.getChunk(x, 0, z);
+                unsigned int size = chunk.updateBuffer(VBO);
+                glDrawArrays(GL_TRIANGLES, 0, size);
             }
         }
 

@@ -9,7 +9,7 @@ Camera::Camera(float aspectRatio, float nearPlane, float farPlane, glm::vec3 pos
     this->farPlane = farPlane;
     this->position = position;
 
-    this->yaw = -90.0f;
+    this->yaw = 0.0f;
     this->pitch = 0.0f;
     this->fov = 45.0f;
 
@@ -38,8 +38,9 @@ void Camera::processMovement(glm::vec3 direction, float deltaTime) {
 }
 
 void Camera::processMouse(float xOffset, float yOffset) {
-    yaw += xOffset * mouseSpeed;
-    pitch += yOffset * mouseSpeed;
+    float speed = mouseSpeed * fov / 45.0f; // Scale look speed with zoom
+    yaw += xOffset * speed;
+    pitch += yOffset * speed;
 
     if (pitch > 89.0f) {
         pitch =  89.0f;
