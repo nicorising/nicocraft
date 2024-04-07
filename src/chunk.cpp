@@ -28,74 +28,26 @@ unsigned int Chunk::updateBuffer(unsigned int VBO) {
         for (int y = 0; y < size; y++) {
             for (int z = 0; z < size; z++) {
                 Block block = blocks[x][y][z];
-                glm::vec3 color = block.color();
+                glm::vec3 offset = glm::vec3(x, y, z);
 
                 if (block.type != AIR) {
                     if (x + 1 >= size || blocks[x + 1][y][z].type == AIR) { // Add right face
-                        for (unsigned int v = 0; v < 6; v++) {
-                            glm::vec3 vertex = Block::rightFace[v];
-                            vertices.push_back(vertex.x + x);
-                            vertices.push_back(vertex.y + y);
-                            vertices.push_back(vertex.z + z);
-                            vertices.push_back(color.x);
-                            vertices.push_back(color.y);
-                            vertices.push_back(color.z);
-                        }
+                        block.addFace(vertices, 0, offset);
                     }
                     if (x - 1 < 0 || blocks[x - 1][y][z].type == AIR) { // Add left face
-                        for (unsigned int v = 0; v < 6; v++) {
-                            glm::vec3 vertex = Block::leftFace[v];
-                            vertices.push_back(vertex.x + x);
-                            vertices.push_back(vertex.y + y);
-                            vertices.push_back(vertex.z + z);
-                            vertices.push_back(color.x);
-                            vertices.push_back(color.y);
-                            vertices.push_back(color.z);
-                        }
+                        block.addFace(vertices, 1, offset);
                     }
                     if (y + 1 >= size || blocks[x][y + 1][z].type == AIR) { // Add top face
-                        for (unsigned int v = 0; v < 6; v++) {
-                            glm::vec3 vertex = Block::topFace[v];
-                            vertices.push_back(vertex.x + x);
-                            vertices.push_back(vertex.y + y);
-                            vertices.push_back(vertex.z + z);
-                            vertices.push_back(color.x);
-                            vertices.push_back(color.y);
-                            vertices.push_back(color.z);
-                        }
+                        block.addFace(vertices, 2, offset);
                     }
                     if (y - 1 < 0 || blocks[x][y - 1][z].type == AIR) { // Add bottom face
-                        for (unsigned int v = 0; v < 6; v++) {
-                            glm::vec3 vertex = Block::bottomFace[v];
-                            vertices.push_back(vertex.x + x);
-                            vertices.push_back(vertex.y + y);
-                            vertices.push_back(vertex.z + z);
-                            vertices.push_back(color.x);
-                            vertices.push_back(color.y);
-                            vertices.push_back(color.z);
-                        }
+                        block.addFace(vertices, 3, offset);
                     }
                     if (z + 1 >= size || blocks[x][y][z + 1].type == AIR) { // Add back face
-                        for (unsigned int v = 0; v < 6; v++) {
-                            glm::vec3 vertex = Block::backFace[v];
-                            vertices.push_back(vertex.x + x);
-                            vertices.push_back(vertex.y + y);
-                            vertices.push_back(vertex.z + z);
-                            vertices.push_back(color.x);
-                            vertices.push_back(color.y);
-                            vertices.push_back(color.z);
-                        }
+                        block.addFace(vertices, 4, offset);
                     }
                     if (z - 1 < 0 || blocks[x][y][z - 1].type == AIR) { // Add front face
-                        for (unsigned int v = 0; v < 6; v++) {
-                            glm::vec3 vertex = Block::frontFace[v];
-                            vertices.push_back(vertex.x + x);
-                            vertices.push_back(vertex.y + y);
-                            vertices.push_back(vertex.z + z);
-                            vertices.push_back(color.x);
-                            vertices.push_back(color.y);
-                            vertices.push_back(color.z);
-                        }
+                        block.addFace(vertices, 5, offset);
                     }
                 }
             }
@@ -103,5 +55,5 @@ unsigned int Chunk::updateBuffer(unsigned int VBO) {
     }
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), &vertices[0]);
-    return vertices.size() / 6;
+    return vertices.size() / 9;
 }
