@@ -21,8 +21,8 @@ void Chunk::setBlock(unsigned int x, unsigned int y, unsigned int z, BlockType t
     blocks[x][y][z].type = type;
 }
 
-unsigned int Chunk::updateBuffer(unsigned int VBO) {
-    std::vector<float> vertices;
+void Chunk::updateMesh() {
+    vertices.clear();
 
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
@@ -53,7 +53,9 @@ unsigned int Chunk::updateBuffer(unsigned int VBO) {
             }
         }
     }
+}
 
+unsigned int Chunk::updateBuffer(unsigned int VBO) {
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), &vertices[0]);
     return vertices.size() / 9;
 }

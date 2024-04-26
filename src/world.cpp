@@ -46,5 +46,6 @@ void World::generate(int x, int y, int z) {
         }
     }
 
+    chunk.updateMesh();
     chunks[glm::ivec3(x, y, z)] = chunk;
 }

@@ -9,7 +9,10 @@ public:
 
     Chunk();
     void setBlock(unsigned int x, unsigned int y, unsigned int z, BlockType type);
+    void updateMesh();
     unsigned int updateBuffer(unsigned int VBO);
+private:
+    std::vector<float> vertices;
 };
 
 #endif

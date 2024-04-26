@@ -115,12 +115,11 @@ int main() {
 
         shader.use();
 
-
         shader.setMat4("view", camera.getViewMatrix());
         shader.setMat4("projection", camera.getProjectionMatrix());
 
-        for (int x = 0; x < 3; x++) {
-            for (int z = 0; z < 3; z++) {
+        for (int x = 0; x < 6; x++) {
+            for (int z = 0; z < 6; z++) {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(x, 0.0f, z) * (float) Chunk::size);
                 shader.setMat4("model", model);
