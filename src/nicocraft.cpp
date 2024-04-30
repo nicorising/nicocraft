@@ -21,8 +21,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 
-const int windowWidth = 1200;
-const int windowHeight = 800;
+const int windowWidth = 1400;
+const int windowHeight = 1000;
 const float nearPlane = 0.1f;
 const float farPlane = 1000.0f;
 
@@ -36,6 +36,8 @@ float scrollOffset = 0.0f;
 
 float aspectRatio = (float) windowWidth / (float) windowHeight;
 glm::vec3 moveDir = glm::vec3(0.0f, 0.0f, 0.0f);
+
+const int renderDistance = 3;
 
 int main() {
     glfwInit();
@@ -70,7 +72,7 @@ int main() {
 
     glEnable(GL_CULL_FACE);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
     glLineWidth(5.0f);
 
     Shader shader("shaders/shader.vs", "shaders/shader.fs");
@@ -98,28 +100,30 @@ int main() {
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*) (6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    Camera camera = Camera(aspectRatio, nearPlane, farPlane, glm::vec3(0.0f, 20.0f, 0.0f), 0.2f, 0.3f, 1.8f);
+    Camera camera = Camera(aspectRatio, nearPlane, farPlane, glm::vec3(0.0f, 20.0f, 0.0f), 0.4f, 0.3f, 1.8f);
     World world = World();
 
     shader.use();
-    shader.setVec3("lightPos", glm::vec3(0.0f, 64.0f, 0.0f));
-    shader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader.setVec3("sunColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     float deltaTime = 0.0f;
     float lastFrame = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glBindVertexArray(VAO);
-
         shader.use();
+
+        shader.setVec3("sunDir", glm::vec3(sin(glfwGetTime() / 100), -cos(glfwGetTime() / 100), 0.0f));
 
         shader.setMat4("view", camera.getViewMatrix());
         shader.setMat4("projection", camera.getProjectionMatrix());
 
-        for (int x = 0; x < 6; x++) {
-            for (int z = 0; z < 6; z++) {
+        for (int dx = -renderDistance; dx <= renderDistance; dx++) {
+            for (int dz = -renderDistance; dz <= renderDistance; dz++) {
+                int x = floor(camera.position.x / Chunk::size) + dx;
+                int z = floor(camera.position.z / Chunk::size) + dz;
+
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(x, 0.0f, z) * (float) Chunk::size);
                 shader.setMat4("model", model);

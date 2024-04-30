@@ -25,10 +25,11 @@ void World::generate(int x, int y, int z) {
 
     for (unsigned int blockX = 0; blockX < Chunk::size; blockX++) {
         for (unsigned int blockZ = 0; blockZ < Chunk::size; blockZ++) {
-            unsigned int height = noise.noise(
-                (float) blockX / Chunk::size + x,
-                (float) blockZ / Chunk::size + z
-            ) * Chunk::size;
+            float noiseX = (float) blockX / Chunk::size + x;
+            float noiseY = (float) blockZ / Chunk::size + z;
+            unsigned int height = (noise.noise(noiseX, noiseY, 1.0f) * 0.7f +
+                                   noise.noise(noiseX, noiseY, 2.0f) * 0.2f +
+                                   noise.noise(noiseX, noiseY, 4.0f) * 0.1f) * Chunk::size;
 
             for (unsigned blockY = 0; blockY < height; blockY++) {
                 BlockType type;

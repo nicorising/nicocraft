@@ -6,7 +6,7 @@
 class Noise {
 public:
     Noise();
-    float noise(float x, float y);
+    float noise(float x, float y, float scale);
 private:
     glm::vec2 gradient(glm::vec2 point);
     float interpolate(float a, float b, float shift);

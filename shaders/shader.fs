@@ -6,16 +6,18 @@ in vec3 color;
 
 out vec4 FragColor;
 
-uniform vec3 lightPos;
-uniform vec3 lightColor;
+uniform vec3 sunDir;
+uniform vec3 sunColor;
 
 void main() {
-    float ambientStrength = 0.1f;
-    vec3 ambient = ambientStrength * lightColor;
+    float ambientStrength = 0.4f;
+    vec3 ambient = ambientStrength * sunColor;
   	
-    vec3 lightDir = normalize(lightPos - fragPos);
-    float diff = max(dot(normal, lightDir), 0.0f);
-    vec3 diffuse = diff * lightColor;
+    float sunDiff = max(dot(normal, normalize(-sunDir)), 0.0f);
+    vec3 sunDiffuse = sunDiff * sunColor;
+
+    float skyDiff = max(dot(normal, vec3(0.0f, 0.1f, 0.0f)), 0.0f);
+    vec3 skyDiffuse = skyDiff * sunColor;
             
-    FragColor = vec4((ambient + diffuse) * color, 1.0f);
+    FragColor = vec4((ambient + sunDiffuse + skyDiffuse) * color, 1.0f);
 }

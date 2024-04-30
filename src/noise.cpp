@@ -6,8 +6,8 @@
 
 Noise::Noise() {}
 
-float Noise::noise(float x, float y) {
-    glm::vec2 point = glm::vec2(x, y);
+float Noise::noise(float x, float y, float scale) {
+    glm::vec2 point = glm::vec2(x, y) * scale;
 
     glm::vec2 bottomLeft = glm::floor(point);
     glm::vec2 bottomRight = bottomLeft + glm::vec2(1.0f, 0.0f);
